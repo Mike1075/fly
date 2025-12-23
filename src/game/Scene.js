@@ -324,35 +324,37 @@ export class GameScene {
   }
 
   createClouds() {
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 40; i++) {
       const cloudGroup = new THREE.Group();
 
       // Create fluffy cloud from multiple spheres
       const numPuffs = 3 + Math.floor(Math.random() * 4);
-      const cloudMaterial = new THREE.MeshStandardMaterial({
+      // Use MeshBasicMaterial with depthWrite: false to prevent Z-fighting
+      const cloudMaterial = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.9,
+        opacity: 0.85,
+        depthWrite: false,  // Prevents Z-fighting with overlapping transparent objects
       });
 
       for (let j = 0; j < numPuffs; j++) {
-        const puffSize = 20 + Math.random() * 30;
-        const puffGeometry = new THREE.SphereGeometry(puffSize, 7, 7);
+        const puffSize = 30 + Math.random() * 50;
+        const puffGeometry = new THREE.SphereGeometry(puffSize, 8, 8);
         const puff = new THREE.Mesh(puffGeometry, cloudMaterial);
         puff.position.set(
-          (j - numPuffs / 2) * 25 + Math.random() * 10,
-          Math.random() * 15,
-          Math.random() * 20
+          (j - numPuffs / 2) * 40 + Math.random() * 20,
+          Math.random() * 25,
+          Math.random() * 30
         );
         cloudGroup.add(puff);
       }
 
-      // Position cloud randomly in sky
+      // Position clouds higher in the sky (above typical flight altitude)
       const angle = Math.random() * Math.PI * 2;
-      const distance = 500 + Math.random() * 3000;
+      const distance = 800 + Math.random() * 4000;
       cloudGroup.position.set(
         Math.cos(angle) * distance,
-        200 + Math.random() * 300,
+        400 + Math.random() * 400,  // Higher: 400-800 instead of 200-500
         Math.sin(angle) * distance
       );
 

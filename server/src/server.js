@@ -89,17 +89,17 @@ wss.on('connection', (ws) => {
 
       switch (type) {
         case 'join':
-          // Add player to game
+          // Add player to game - spawn on runway
           currentPlayer = {
             id: payload.playerId,
             nickname: payload.nickname,
-            x: Math.random() * 1000 - 500,
-            y: 100 + Math.random() * 100,
-            z: Math.random() * 1000 - 500,
+            x: 0,
+            y: 5,
+            z: 180,
             qx: 0,
-            qy: 0,
+            qy: Math.sin(Math.PI / 2),  // Facing -Z (towards island)
             qz: 0,
-            qw: 1,
+            qw: Math.cos(Math.PI / 2),
             health: 100,
             score: 0,
             isDead: false,

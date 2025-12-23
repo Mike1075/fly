@@ -145,11 +145,11 @@ export class Plane {
     if (this.input.down) pitchDelta += this.pitchSpeed * deltaTime;
     if (this.input.left) {
       yawDelta += this.turnSpeed * deltaTime;
-      rollDelta -= this.rollSpeed * deltaTime;
+      rollDelta += this.rollSpeed * deltaTime;  // Roll left (left wing down)
     }
     if (this.input.right) {
       yawDelta -= this.turnSpeed * deltaTime;
-      rollDelta += this.rollSpeed * deltaTime;
+      rollDelta -= this.rollSpeed * deltaTime;  // Roll right (right wing down)
     }
 
     // Apply rotation

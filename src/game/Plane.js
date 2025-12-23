@@ -6,10 +6,10 @@ export class Plane {
     this.nickname = nickname;
     this.isLocalPlayer = isLocalPlayer;
 
-    // Physics properties - spawn on runway, player must take off
-    this.position = new THREE.Vector3(0, 5, 180);  // On runway near the end
+    // Physics properties - spawn at runway START, facing down the runway
+    this.position = new THREE.Vector3(0, 5, -180);  // At start of runway
     this.velocity = new THREE.Vector3(0, 0, 0);
-    this.rotation = new THREE.Euler(0, Math.PI, 0);  // Face towards island center (-Z)
+    this.rotation = new THREE.Euler(0, 0, 0);  // Face +Z direction (down the runway)
     this.quaternion = new THREE.Quaternion();
     this.quaternion.setFromEuler(this.rotation);
 
@@ -263,10 +263,10 @@ export class Plane {
   respawn() {
     this.isDead = false;
     this.health = 100;
-    // Respawn on runway, must take off again
-    this.position.set(0, 5, 180);
+    // Respawn at runway START, facing down the runway
+    this.position.set(0, 5, -180);
     this.velocity.set(0, 0, 0);
-    this.rotation.set(0, Math.PI, 0);  // Face towards island center (-Z)
+    this.rotation.set(0, 0, 0);  // Face +Z direction (down the runway)
     this.quaternion.setFromEuler(this.rotation);
     this.speed = 0;  // Start stationary
     this.updateMeshPosition();

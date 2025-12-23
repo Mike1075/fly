@@ -34,8 +34,8 @@ export class GameScene {
     this.camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
-      0.1,
-      10000
+      1,      // Increased near plane to reduce Z-fighting
+      15000
     );
     this.camera.position.set(0, 5, 10);
   }
@@ -66,7 +66,8 @@ export class GameScene {
   setupEnvironment() {
     // Sky
     this.scene.background = new THREE.Color(0x87CEEB);
-    this.scene.fog = new THREE.Fog(0x87CEEB, 1000, 8000);
+    // Fog disabled to prevent flickering - use distance-based visibility instead
+    // this.scene.fog = new THREE.Fog(0x87CEEB, 2000, 10000);
 
     // Water (ocean surrounding the island)
     const waterGeometry = new THREE.PlaneGeometry(50000, 50000);
@@ -349,12 +350,12 @@ export class GameScene {
         cloudGroup.add(puff);
       }
 
-      // Position clouds higher in the sky (above typical flight altitude)
+      // Position clouds very high in the sky (decorative only)
       const angle = Math.random() * Math.PI * 2;
-      const distance = 800 + Math.random() * 4000;
+      const distance = 1000 + Math.random() * 5000;
       cloudGroup.position.set(
         Math.cos(angle) * distance,
-        400 + Math.random() * 400,  // Higher: 400-800 instead of 200-500
+        800 + Math.random() * 700,  // Very high: 800-1500
         Math.sin(angle) * distance
       );
 

@@ -6,17 +6,18 @@ export class Plane {
     this.nickname = nickname;
     this.isLocalPlayer = isLocalPlayer;
 
-    // Physics properties - spawn above runway facing inland
-    this.position = new THREE.Vector3(0, 80, 300);
+    // Physics properties - spawn on runway, player must take off
+    this.position = new THREE.Vector3(0, 5, 180);  // On runway near the end
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.rotation = new THREE.Euler(0, Math.PI, 0);  // Face towards island center (-Z)
     this.quaternion = new THREE.Quaternion();
     this.quaternion.setFromEuler(this.rotation);
 
-    this.speed = 60;  // Start with cruising speed
+    this.speed = 0;  // Start stationary, player accelerates to take off
     this.maxSpeed = 200;
-    this.minSpeed = 30;
-    this.acceleration = 40;
+    this.minSpeed = 0;   // Allow stopping on ground
+    this.takeoffSpeed = 40;  // Minimum speed to generate lift
+    this.acceleration = 50;  // Slightly faster acceleration
     this.turnSpeed = 1.5;
     this.pitchSpeed = 1.0;
     this.rollSpeed = 2.0;
@@ -121,17 +122,27 @@ export class Plane {
   updatePhysics(deltaTime) {
     if (this.isDead) return;
 
+    // Check if on ground for different physics
+    const onGround = this.position.y <= 5.5;
+
     // Update speed based on input
     if (this.input.boost) {
       this.speed += this.acceleration * deltaTime * 2;
     } else if (this.input.forward) {
       this.speed += this.acceleration * deltaTime;
     } else if (this.input.backward) {
-      this.speed -= this.acceleration * deltaTime;
+      this.speed -= this.acceleration * deltaTime * 1.5;
     } else {
-      // Gradually return to cruise speed
-      const targetSpeed = 60;
-      this.speed += (targetSpeed - this.speed) * deltaTime;
+      // In air: gradually maintain cruising speed
+      // On ground: apply friction to slow down
+      if (onGround) {
+        this.speed *= 0.99;  // Ground friction
+        if (this.speed < 1) this.speed = 0;
+      } else {
+        // Air drag - slowly approach cruise speed
+        const targetSpeed = 60;
+        this.speed += (targetSpeed - this.speed) * deltaTime * 0.5;
+      }
     }
 
     // Clamp speed
@@ -177,12 +188,17 @@ export class Plane {
     // Update velocity
     this.velocity.copy(forward).multiplyScalar(this.speed);
 
-    // Apply gravity (slight downward force)
+    // Check if on ground
+    const isOnGround = this.position.y <= 5.5;
+
+    // Apply gravity
     this.velocity.y -= 9.8 * deltaTime * 0.5;
 
-    // Lift force (counters gravity when moving)
-    const liftForce = (this.speed / this.maxSpeed) * 15;
-    this.velocity.y += liftForce * deltaTime;
+    // Lift force only when above takeoff speed
+    if (this.speed >= this.takeoffSpeed) {
+      const liftForce = ((this.speed - this.takeoffSpeed) / (this.maxSpeed - this.takeoffSpeed)) * 20;
+      this.velocity.y += liftForce * deltaTime;
+    }
 
     // Update position
     this.position.add(this.velocity.clone().multiplyScalar(deltaTime));
@@ -190,10 +206,15 @@ export class Plane {
     // Ground collision
     if (this.position.y < 5) {
       this.position.y = 5;
-      if (this.velocity.y < -20) {
+      if (this.velocity.y < -15 && this.speed > 20) {
+        // Only crash if falling fast with some speed
         this.die();
       } else {
         this.velocity.y = 0;
+        // On ground, limit pitch to prevent nosedive
+        if (this.rotation.x > 0.1) {
+          this.rotation.x *= 0.9;
+        }
       }
     }
 
@@ -242,12 +263,12 @@ export class Plane {
   respawn() {
     this.isDead = false;
     this.health = 100;
-    // Respawn above runway facing inland
-    this.position.set(0, 80, 300);
+    // Respawn on runway, must take off again
+    this.position.set(0, 5, 180);
     this.velocity.set(0, 0, 0);
     this.rotation.set(0, Math.PI, 0);  // Face towards island center (-Z)
     this.quaternion.setFromEuler(this.rotation);
-    this.speed = 60;
+    this.speed = 0;  // Start stationary
     this.updateMeshPosition();
   }
 

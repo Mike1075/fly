@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { GameScene } from './Scene.js';
 import { Plane } from './Plane.js';
 import { Missile } from './Missile.js';

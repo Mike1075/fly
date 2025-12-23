@@ -66,10 +66,10 @@ export class GameScene {
   setupEnvironment() {
     // Sky
     this.scene.background = new THREE.Color(0x87CEEB);
-    this.scene.fog = new THREE.Fog(0x87CEEB, 500, 5000);
+    this.scene.fog = new THREE.Fog(0x87CEEB, 1000, 8000);
 
     // Water (ocean surrounding the island)
-    const waterGeometry = new THREE.PlaneGeometry(20000, 20000);
+    const waterGeometry = new THREE.PlaneGeometry(50000, 50000);
     const waterMaterial = new THREE.MeshStandardMaterial({
       color: 0x1e90ff,
       roughness: 0.3,
@@ -80,8 +80,8 @@ export class GameScene {
     water.position.y = -1;
     this.scene.add(water);
 
-    // Island ground
-    const groundGeometry = new THREE.CircleGeometry(2000, 32);
+    // Island ground (much larger)
+    const groundGeometry = new THREE.CircleGeometry(5000, 64);
     const groundMaterial = new THREE.MeshStandardMaterial({
       color: 0x4a7c59,
       roughness: 0.8,
@@ -93,7 +93,7 @@ export class GameScene {
     this.scene.add(ground);
 
     // Beach ring around island
-    const beachGeometry = new THREE.RingGeometry(1900, 2100, 32);
+    const beachGeometry = new THREE.RingGeometry(4800, 5200, 64);
     const beachMaterial = new THREE.MeshStandardMaterial({
       color: 0xf4d03f,
       roughness: 0.9,
@@ -186,14 +186,18 @@ export class GameScene {
 
   createMountains() {
     const mountainPositions = [
-      { x: 800, z: -800, scale: 1.5 },
-      { x: -900, z: -700, scale: 1.2 },
-      { x: 1000, z: 600, scale: 1.8 },
-      { x: -700, z: 900, scale: 1.3 },
-      { x: 1400, z: -200, scale: 2.0 },
-      { x: -1200, z: -400, scale: 1.6 },
-      { x: 500, z: 1200, scale: 1.4 },
-      { x: -500, z: -1300, scale: 1.7 },
+      { x: 1500, z: -1500, scale: 1.5 },
+      { x: -1800, z: -1400, scale: 1.2 },
+      { x: 2000, z: 1200, scale: 1.8 },
+      { x: -1400, z: 1800, scale: 1.3 },
+      { x: 2800, z: -400, scale: 2.0 },
+      { x: -2400, z: -800, scale: 1.6 },
+      { x: 1000, z: 2400, scale: 1.4 },
+      { x: -1000, z: -2600, scale: 1.7 },
+      { x: 3000, z: 1500, scale: 2.2 },
+      { x: -2800, z: 1200, scale: 1.9 },
+      { x: 800, z: -3000, scale: 1.8 },
+      { x: -600, z: 3200, scale: 1.5 },
     ];
 
     mountainPositions.forEach(pos => {
@@ -223,16 +227,16 @@ export class GameScene {
     const treePositions = [];
 
     // Generate random tree positions (avoiding runway area)
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 500; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const distance = 100 + Math.random() * 1700;
+      const distance = 150 + Math.random() * 4500;
       const x = Math.cos(angle) * distance;
       const z = Math.sin(angle) * distance;
 
       // Avoid runway area
-      if (Math.abs(x) < 80 && Math.abs(z) < 250) continue;
+      if (Math.abs(x) < 100 && Math.abs(z) < 300) continue;
 
-      treePositions.push({ x, z, scale: 0.5 + Math.random() * 1 });
+      treePositions.push({ x, z, scale: 0.5 + Math.random() * 1.2 });
     }
 
     treePositions.forEach(pos => {
@@ -264,20 +268,33 @@ export class GameScene {
 
   createBuildings() {
     const buildingConfigs = [
-      // Small village area
-      { x: 200, z: 300, w: 20, h: 15, d: 20, color: 0xDEB887 },
-      { x: 230, z: 280, w: 15, h: 12, d: 15, color: 0xF5DEB3 },
-      { x: 180, z: 330, w: 18, h: 18, d: 18, color: 0xD2B48C },
-      { x: 250, z: 320, w: 12, h: 10, d: 12, color: 0xFFE4C4 },
+      // Village near airport
+      { x: 200, z: 400, w: 20, h: 15, d: 20, color: 0xDEB887 },
+      { x: 250, z: 380, w: 15, h: 12, d: 15, color: 0xF5DEB3 },
+      { x: 180, z: 450, w: 18, h: 18, d: 18, color: 0xD2B48C },
+      { x: 280, z: 420, w: 12, h: 10, d: 12, color: 0xFFE4C4 },
       // Industrial area
-      { x: -300, z: 200, w: 40, h: 20, d: 30, color: 0x708090 },
-      { x: -350, z: 250, w: 25, h: 35, d: 25, color: 0x778899 },
-      { x: -280, z: 280, w: 30, h: 15, d: 35, color: 0x696969 },
-      // Residential
-      { x: -200, z: -300, w: 15, h: 12, d: 15, color: 0xFFE4E1 },
-      { x: -230, z: -330, w: 18, h: 14, d: 18, color: 0xFFF0F5 },
-      { x: -170, z: -280, w: 14, h: 10, d: 14, color: 0xFAF0E6 },
-      { x: -250, z: -280, w: 16, h: 16, d: 16, color: 0xFDF5E6 },
+      { x: -400, z: 300, w: 40, h: 20, d: 30, color: 0x708090 },
+      { x: -480, z: 350, w: 25, h: 35, d: 25, color: 0x778899 },
+      { x: -350, z: 380, w: 30, h: 15, d: 35, color: 0x696969 },
+      // Residential area 1
+      { x: -300, z: -400, w: 15, h: 12, d: 15, color: 0xFFE4E1 },
+      { x: -350, z: -450, w: 18, h: 14, d: 18, color: 0xFFF0F5 },
+      { x: -250, z: -380, w: 14, h: 10, d: 14, color: 0xFAF0E6 },
+      { x: -380, z: -380, w: 16, h: 16, d: 16, color: 0xFDF5E6 },
+      // Town center (larger buildings)
+      { x: 800, z: -600, w: 30, h: 40, d: 30, color: 0xB0C4DE },
+      { x: 860, z: -580, w: 25, h: 55, d: 25, color: 0xA9A9A9 },
+      { x: 750, z: -650, w: 35, h: 30, d: 35, color: 0xC0C0C0 },
+      { x: 820, z: -700, w: 20, h: 25, d: 20, color: 0xDCDCDC },
+      // Coastal village
+      { x: -1200, z: 800, w: 18, h: 12, d: 18, color: 0xFFE4C4 },
+      { x: -1150, z: 850, w: 15, h: 10, d: 15, color: 0xFAEBD7 },
+      { x: -1250, z: 780, w: 20, h: 14, d: 20, color: 0xFFDEAD },
+      // Mountain village
+      { x: 1800, z: 1000, w: 16, h: 12, d: 16, color: 0xD2691E },
+      { x: 1850, z: 1050, w: 14, h: 10, d: 14, color: 0xCD853F },
+      { x: 1750, z: 980, w: 18, h: 15, d: 18, color: 0xDEB887 },
     ];
 
     buildingConfigs.forEach(config => {

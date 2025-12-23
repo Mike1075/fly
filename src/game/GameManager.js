@@ -30,6 +30,10 @@ export class GameManager {
     // Camera follow settings
     this.cameraDistance = 15;
     this.cameraHeight = 5;
+
+    // Death handling
+    this.deathTime = null;
+    this.respawnDelay = 2000; // 2 seconds
   }
 
   generatePlayerId() {
@@ -213,7 +217,21 @@ export class GameManager {
 
     // Update local player
     if (this.localPlayer) {
-      this.localPlayer.updatePhysics(deltaTime);
+      // Check for death and handle respawn
+      if (this.localPlayer.isDead) {
+        if (!this.deathTime) {
+          this.deathTime = currentTime;
+          this.ui.showKillFeed('You crashed! Respawning...');
+        } else if (currentTime - this.deathTime > this.respawnDelay) {
+          this.localPlayer.respawn();
+          this.deathTime = null;
+          if (this.ws && this.ws.isConnected) {
+            this.ws.send('respawn', this.localPlayer.getState());
+          }
+        }
+      } else {
+        this.localPlayer.updatePhysics(deltaTime);
+      }
 
       // Send state to server
       if (this.ws && this.ws.isConnected) {

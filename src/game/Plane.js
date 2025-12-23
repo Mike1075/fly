@@ -6,13 +6,14 @@ export class Plane {
     this.nickname = nickname;
     this.isLocalPlayer = isLocalPlayer;
 
-    // Physics properties
-    this.position = new THREE.Vector3(0, 100, 0);
+    // Physics properties - spawn above runway facing inland
+    this.position = new THREE.Vector3(0, 80, 300);
     this.velocity = new THREE.Vector3(0, 0, 0);
-    this.rotation = new THREE.Euler(0, 0, 0);
+    this.rotation = new THREE.Euler(0, Math.PI, 0);  // Face towards island center (-Z)
     this.quaternion = new THREE.Quaternion();
+    this.quaternion.setFromEuler(this.rotation);
 
-    this.speed = 0;
+    this.speed = 60;  // Start with cruising speed
     this.maxSpeed = 200;
     this.minSpeed = 30;
     this.acceleration = 40;
@@ -241,14 +242,13 @@ export class Plane {
   respawn() {
     this.isDead = false;
     this.health = 100;
-    this.position.set(
-      Math.random() * 1000 - 500,
-      100 + Math.random() * 100,
-      Math.random() * 1000 - 500
-    );
+    // Respawn above runway facing inland
+    this.position.set(0, 80, 300);
     this.velocity.set(0, 0, 0);
-    this.rotation.set(0, Math.random() * Math.PI * 2, 0);
+    this.rotation.set(0, Math.PI, 0);  // Face towards island center (-Z)
+    this.quaternion.setFromEuler(this.rotation);
     this.speed = 60;
+    this.updateMeshPosition();
   }
 
   // Update from server data (for remote players)

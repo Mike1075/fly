@@ -38,10 +38,12 @@ export class Plane {
 
     // Create 3D model
     this.mesh = this.createMesh();
-    this.updateMeshPosition();
 
     // Name tag
     this.nameTag = this.createNameTag();
+
+    // Update positions after all objects are created
+    this.updateMeshPosition();
   }
 
   createMesh() {

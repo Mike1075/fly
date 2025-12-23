@@ -66,52 +66,281 @@ export class GameScene {
   setupEnvironment() {
     // Sky
     this.scene.background = new THREE.Color(0x87CEEB);
-    this.scene.fog = new THREE.Fog(0x87CEEB, 1000, 8000);
+    this.scene.fog = new THREE.Fog(0x87CEEB, 500, 5000);
 
-    // Ground
-    const groundGeometry = new THREE.PlaneGeometry(10000, 10000, 50, 50);
+    // Water (ocean surrounding the island)
+    const waterGeometry = new THREE.PlaneGeometry(20000, 20000);
+    const waterMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1e90ff,
+      roughness: 0.3,
+      metalness: 0.1,
+    });
+    const water = new THREE.Mesh(waterGeometry, waterMaterial);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = -1;
+    this.scene.add(water);
+
+    // Island ground
+    const groundGeometry = new THREE.CircleGeometry(2000, 32);
     const groundMaterial = new THREE.MeshStandardMaterial({
       color: 0x4a7c59,
       roughness: 0.8,
     });
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
+    ground.position.y = 0;
     ground.receiveShadow = true;
     this.scene.add(ground);
 
-    // Add some mountains (low-poly style)
-    this.createMountains();
+    // Beach ring around island
+    const beachGeometry = new THREE.RingGeometry(1900, 2100, 32);
+    const beachMaterial = new THREE.MeshStandardMaterial({
+      color: 0xf4d03f,
+      roughness: 0.9,
+    });
+    const beach = new THREE.Mesh(beachGeometry, beachMaterial);
+    beach.rotation.x = -Math.PI / 2;
+    beach.position.y = 0.1;
+    this.scene.add(beach);
 
-    // Grid helper for better spatial awareness (optional)
-    const gridHelper = new THREE.GridHelper(5000, 100, 0x000000, 0x333333);
-    gridHelper.material.opacity = 0.2;
-    gridHelper.material.transparent = true;
-    this.scene.add(gridHelper);
+    // Add environment elements
+    this.createAirport();
+    this.createMountains();
+    this.createTrees();
+    this.createBuildings();
+    this.createClouds();
+  }
+
+  createAirport() {
+    // Runway
+    const runwayGeometry = new THREE.PlaneGeometry(40, 400);
+    const runwayMaterial = new THREE.MeshStandardMaterial({
+      color: 0x333333,
+      roughness: 0.9,
+    });
+    const runway = new THREE.Mesh(runwayGeometry, runwayMaterial);
+    runway.rotation.x = -Math.PI / 2;
+    runway.position.set(0, 0.2, 0);
+    runway.receiveShadow = true;
+    this.scene.add(runway);
+
+    // Runway stripes
+    const stripeGeometry = new THREE.PlaneGeometry(3, 20);
+    const stripeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    for (let i = -180; i <= 180; i += 40) {
+      const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
+      stripe.rotation.x = -Math.PI / 2;
+      stripe.position.set(0, 0.3, i);
+      this.scene.add(stripe);
+    }
+
+    // Control tower
+    const towerGroup = new THREE.Group();
+
+    // Tower base
+    const towerBaseGeometry = new THREE.BoxGeometry(15, 40, 15);
+    const towerMaterial = new THREE.MeshStandardMaterial({
+      color: 0xcccccc,
+      flatShading: true
+    });
+    const towerBase = new THREE.Mesh(towerBaseGeometry, towerMaterial);
+    towerBase.position.y = 20;
+    towerBase.castShadow = true;
+    towerGroup.add(towerBase);
+
+    // Control room (glass top)
+    const controlRoomGeometry = new THREE.BoxGeometry(20, 10, 20);
+    const glassMaterial = new THREE.MeshStandardMaterial({
+      color: 0x87CEEB,
+      transparent: true,
+      opacity: 0.7,
+      metalness: 0.3,
+    });
+    const controlRoom = new THREE.Mesh(controlRoomGeometry, glassMaterial);
+    controlRoom.position.y = 45;
+    controlRoom.castShadow = true;
+    towerGroup.add(controlRoom);
+
+    // Roof
+    const roofGeometry = new THREE.ConeGeometry(15, 8, 4);
+    const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x8B0000 });
+    const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+    roof.position.y = 54;
+    roof.rotation.y = Math.PI / 4;
+    towerGroup.add(roof);
+
+    towerGroup.position.set(60, 0, 0);
+    this.scene.add(towerGroup);
+
+    // Hangar
+    const hangarGeometry = new THREE.BoxGeometry(60, 25, 40);
+    const hangarMaterial = new THREE.MeshStandardMaterial({
+      color: 0x708090,
+      flatShading: true
+    });
+    const hangar = new THREE.Mesh(hangarGeometry, hangarMaterial);
+    hangar.position.set(-60, 12.5, -50);
+    hangar.castShadow = true;
+    this.scene.add(hangar);
   }
 
   createMountains() {
-    const mountainGeometry = new THREE.ConeGeometry(100, 300, 6);
-    const mountainMaterial = new THREE.MeshStandardMaterial({
-      color: 0x8B7355,
-      flatShading: true,
-    });
-
-    const positions = [
-      { x: 500, z: -800 },
-      { x: -600, z: -1000 },
-      { x: 800, z: 500 },
-      { x: -400, z: 700 },
-      { x: 1200, z: -200 },
-      { x: -1000, z: -500 },
+    const mountainPositions = [
+      { x: 800, z: -800, scale: 1.5 },
+      { x: -900, z: -700, scale: 1.2 },
+      { x: 1000, z: 600, scale: 1.8 },
+      { x: -700, z: 900, scale: 1.3 },
+      { x: 1400, z: -200, scale: 2.0 },
+      { x: -1200, z: -400, scale: 1.6 },
+      { x: 500, z: 1200, scale: 1.4 },
+      { x: -500, z: -1300, scale: 1.7 },
     ];
 
-    positions.forEach(pos => {
+    mountainPositions.forEach(pos => {
+      const mountainGeometry = new THREE.ConeGeometry(80 * pos.scale, 200 * pos.scale, 6);
+      const mountainMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8B7355,
+        flatShading: true,
+      });
       const mountain = new THREE.Mesh(mountainGeometry, mountainMaterial);
-      mountain.position.set(pos.x, 150, pos.z);
+      mountain.position.set(pos.x, 100 * pos.scale, pos.z);
       mountain.castShadow = true;
       mountain.receiveShadow = true;
       this.scene.add(mountain);
+
+      // Snow cap on larger mountains
+      if (pos.scale > 1.4) {
+        const snowCapGeometry = new THREE.ConeGeometry(30 * pos.scale, 50 * pos.scale, 6);
+        const snowMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const snowCap = new THREE.Mesh(snowCapGeometry, snowMaterial);
+        snowCap.position.set(pos.x, 175 * pos.scale, pos.z);
+        this.scene.add(snowCap);
+      }
     });
+  }
+
+  createTrees() {
+    const treePositions = [];
+
+    // Generate random tree positions (avoiding runway area)
+    for (let i = 0; i < 200; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 100 + Math.random() * 1700;
+      const x = Math.cos(angle) * distance;
+      const z = Math.sin(angle) * distance;
+
+      // Avoid runway area
+      if (Math.abs(x) < 80 && Math.abs(z) < 250) continue;
+
+      treePositions.push({ x, z, scale: 0.5 + Math.random() * 1 });
+    }
+
+    treePositions.forEach(pos => {
+      const treeGroup = new THREE.Group();
+
+      // Trunk
+      const trunkGeometry = new THREE.CylinderGeometry(1, 2, 8 * pos.scale, 6);
+      const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+      const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+      trunk.position.y = 4 * pos.scale;
+      trunk.castShadow = true;
+      treeGroup.add(trunk);
+
+      // Foliage (low-poly cone)
+      const foliageGeometry = new THREE.ConeGeometry(6 * pos.scale, 15 * pos.scale, 6);
+      const foliageMaterial = new THREE.MeshStandardMaterial({
+        color: 0x228B22,
+        flatShading: true,
+      });
+      const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+      foliage.position.y = 12 * pos.scale;
+      foliage.castShadow = true;
+      treeGroup.add(foliage);
+
+      treeGroup.position.set(pos.x, 0, pos.z);
+      this.scene.add(treeGroup);
+    });
+  }
+
+  createBuildings() {
+    const buildingConfigs = [
+      // Small village area
+      { x: 200, z: 300, w: 20, h: 15, d: 20, color: 0xDEB887 },
+      { x: 230, z: 280, w: 15, h: 12, d: 15, color: 0xF5DEB3 },
+      { x: 180, z: 330, w: 18, h: 18, d: 18, color: 0xD2B48C },
+      { x: 250, z: 320, w: 12, h: 10, d: 12, color: 0xFFE4C4 },
+      // Industrial area
+      { x: -300, z: 200, w: 40, h: 20, d: 30, color: 0x708090 },
+      { x: -350, z: 250, w: 25, h: 35, d: 25, color: 0x778899 },
+      { x: -280, z: 280, w: 30, h: 15, d: 35, color: 0x696969 },
+      // Residential
+      { x: -200, z: -300, w: 15, h: 12, d: 15, color: 0xFFE4E1 },
+      { x: -230, z: -330, w: 18, h: 14, d: 18, color: 0xFFF0F5 },
+      { x: -170, z: -280, w: 14, h: 10, d: 14, color: 0xFAF0E6 },
+      { x: -250, z: -280, w: 16, h: 16, d: 16, color: 0xFDF5E6 },
+    ];
+
+    buildingConfigs.forEach(config => {
+      const buildingGeometry = new THREE.BoxGeometry(config.w, config.h, config.d);
+      const buildingMaterial = new THREE.MeshStandardMaterial({
+        color: config.color,
+        flatShading: true,
+      });
+      const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+      building.position.set(config.x, config.h / 2, config.z);
+      building.castShadow = true;
+      building.receiveShadow = true;
+      this.scene.add(building);
+
+      // Add roof
+      const roofGeometry = new THREE.ConeGeometry(
+        Math.max(config.w, config.d) * 0.7,
+        config.h * 0.3,
+        4
+      );
+      const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x8B0000 });
+      const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+      roof.position.set(config.x, config.h + config.h * 0.15, config.z);
+      roof.rotation.y = Math.PI / 4;
+      this.scene.add(roof);
+    });
+  }
+
+  createClouds() {
+    for (let i = 0; i < 30; i++) {
+      const cloudGroup = new THREE.Group();
+
+      // Create fluffy cloud from multiple spheres
+      const numPuffs = 3 + Math.floor(Math.random() * 4);
+      const cloudMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.9,
+      });
+
+      for (let j = 0; j < numPuffs; j++) {
+        const puffSize = 20 + Math.random() * 30;
+        const puffGeometry = new THREE.SphereGeometry(puffSize, 7, 7);
+        const puff = new THREE.Mesh(puffGeometry, cloudMaterial);
+        puff.position.set(
+          (j - numPuffs / 2) * 25 + Math.random() * 10,
+          Math.random() * 15,
+          Math.random() * 20
+        );
+        cloudGroup.add(puff);
+      }
+
+      // Position cloud randomly in sky
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 500 + Math.random() * 3000;
+      cloudGroup.position.set(
+        Math.cos(angle) * distance,
+        200 + Math.random() * 300,
+        Math.sin(angle) * distance
+      );
+
+      this.scene.add(cloudGroup);
+    }
   }
 
   render() {
